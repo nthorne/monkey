@@ -1,0 +1,5 @@
+# python binary files
+*.py[co]
+
+# vim swap files
+.*.sw?
