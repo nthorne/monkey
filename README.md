@@ -26,7 +26,7 @@ The files for this example are available under the *sample* subfolder.
     bool,bar
 
 
-    $ monkey header_file sample/footer sample/template sample/csv
+    $ monkey sample/header sample/footer sample/template sample/csv
 
     class Foo
     {
