@@ -29,9 +29,9 @@ def print_usage():
     print "usage:", os.path.basename(sys.argv[0]), "HEADER FOOTER TEMPLATE CSV"
     print
     print "Translate CSV into output by, for each CSV line, replacing every"
-    print "occurence of %[0-9]+% within TEMPLATE with its respective CSV column."
-    print "HEADER and FOOTER is prepended and appended, respectively, to the output,"
-    print "which is written to stdout"
+    print "occurence of %[0-9]+% in TEMPLATE with its respective CSV column."
+    print "HEADER and FOOTER is prepended and appended, respectively, to the"
+    print "output, which is written to stdout"
 
 
 class Parser:
@@ -58,10 +58,12 @@ class Parser:
                         for match in matches:
                             index = int(match.strip().strip('%'))
                             try:
-                                tmpl = tmpl.replace(match.strip(), fields[index - 1])
+                                tmpl = tmpl.replace(match.strip(),
+                                                    fields[index - 1])
                             except:
-                                sys.stderr.write("Failed to access index %d for line %s, csv %s\n"
-                                                 %(index, tmpl, fields))
+                                sys.stderr.write("no item %d (%s), in %s\n"
+                                                 %(index, tmpl.rstrip(),
+                                                   fields))
                     result += tmpl
 
         result += self.__footer.read()
