@@ -17,15 +17,16 @@
 #You should have received a copy of the GNU General Public License
 #along with monkey.  If not, see <http://www.gnu.org/licenses/>.
 
+""" monkey is a utility for translating CSV files based on template rules. """
 
 import sys
 import os
 import re
 
-from StringIO import StringIO
-
 
 def print_usage():
+    """ Display help text. """
+
     print "usage:", os.path.basename(sys.argv[0]), "HEADER FOOTER TEMPLATE CSV"
     print
     print "Translate CSV into output by, for each CSV line, replacing every"
@@ -35,6 +36,8 @@ def print_usage():
 
 
 class Parser:
+    """ This type implements the CSV parser. """
+
     def __init__(self, header, footer, template, csv):
         self.__header = header
         self.__footer = footer
@@ -42,6 +45,9 @@ class Parser:
         self.__csv = csv
 
     def parse(self):
+        """ Parse the CSV file, and produce output based on the header, footer
+        and template files. """
+
         result = self.__header.read()
 
         for line in self.__csv:
@@ -77,7 +83,7 @@ if "__main__" == __name__:
         sys.exit(1)
 
     try:
-        header = open(sys.argv[1])
+        HEADER = open(sys.argv[1])
     except:
         print "error: HEADER file", sys.argv[1], "not found."
         print
@@ -85,7 +91,7 @@ if "__main__" == __name__:
         sys.exit(1)
 
     try:
-        footer = open(sys.argv[2])
+        FOOTER = open(sys.argv[2])
     except:
         print "error: FOOTER file", sys.argv[2], "not found."
         print
@@ -93,7 +99,7 @@ if "__main__" == __name__:
         sys.exit(1)
 
     try:
-        template = open(sys.argv[3])
+        TEMPLATE = open(sys.argv[3])
     except:
         print "error: TEMPLATE file", sys.argv[3], "not found."
         print
@@ -101,20 +107,20 @@ if "__main__" == __name__:
         sys.exit(1)
 
     try:
-        csv = open(sys.argv[4])
+        CSV = open(sys.argv[4])
     except:
         print "error: CSV", sys.argv[4], "not found."
         print
         print_usage()
         sys.exit(1)
 
-    p = Parser(header, footer, template, csv)
+    PARS = Parser(HEADER, FOOTER, TEMPLATE, CSV)
 
-    out = p.parse();
+    OUT = PARS.parse()
 
-    header.close()
-    footer.close()
-    template.close()
-    csv.close()
+    HEADER.close()
+    FOOTER.close()
+    TEMPLATE.close()
+    CSV.close()
 
-    print out
+    print OUT
