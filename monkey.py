@@ -24,6 +24,10 @@ import os
 import re
 
 
+class InvalidIndex(Exception):
+    def __init__(self, *args):
+        super(InvalidIndex, self).__init__(*args)
+
 def print_usage():
     """ Display help text. """
 
@@ -77,50 +81,60 @@ class Parser:
         return result
 
 
+def main(args):
+    """ Avoid polluting the global namespace. """
+
+    if 5 != len(args):
+        if 2 == len(args) and ("-h" == args[1] or "--help" == args[1]):
+            print_usage()
+            return 0
+        else:
+            print_usage()
+            return 1
+
+    try:
+        header = open(args[1])
+    except:
+        print "error: header file", args[1], "not found."
+        print
+        print_usage()
+        return 2
+
+    try:
+        footer = open(args[2])
+    except:
+        print "error: footer file", args[2], "not found."
+        print
+        print_usage()
+        return 2
+
+    try:
+        template = open(args[3])
+    except:
+        print "error: template file", args[3], "not found."
+        print
+        print_usage()
+        return 2
+
+    try:
+        csv = open(args[4])
+    except:
+        print "error: csv", args[4], "not found."
+        print
+        print_usage()
+        return 2
+
+    parser = Parser(header, footer, template, csv)
+
+    out = parser.parse()
+
+    header.close()
+    footer.close()
+    template.close()
+    csv.close()
+
+    print out
+    return 0
+
 if "__main__" == __name__:
-    if 5 != len(sys.argv) or '-h' == sys.argv[1] or '--help' == sys.argv[1]:
-        print_usage()
-        sys.exit(1)
-
-    try:
-        HEADER = open(sys.argv[1])
-    except:
-        print "error: HEADER file", sys.argv[1], "not found."
-        print
-        print_usage()
-        sys.exit(1)
-
-    try:
-        FOOTER = open(sys.argv[2])
-    except:
-        print "error: FOOTER file", sys.argv[2], "not found."
-        print
-        print_usage()
-        sys.exit(1)
-
-    try:
-        TEMPLATE = open(sys.argv[3])
-    except:
-        print "error: TEMPLATE file", sys.argv[3], "not found."
-        print
-        print_usage()
-        sys.exit(1)
-
-    try:
-        CSV = open(sys.argv[4])
-    except:
-        print "error: CSV", sys.argv[4], "not found."
-        print
-        print_usage()
-        sys.exit(1)
-
-    PARS = Parser(HEADER, FOOTER, TEMPLATE, CSV)
-
-    OUT = PARS.parse()
-
-    HEADER.close()
-    FOOTER.close()
-    TEMPLATE.close()
-    CSV.close()
-
-    print OUT
+    sys.exit(main(sys.argv))
