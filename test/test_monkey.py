@@ -38,18 +38,12 @@ from StringIO import StringIO
 class DummyFile(object):
     """ This type is used to provide a NOOP writem for suppressing output to
     stdout. """
+
     def write(self, data):
+        """ Since we do not use the data, write does nothing. """
+
         pass
 
-class StringBuilder(object):
-    def __init__(self):
-        self.__str = ""
-
-    def write(self, data):
-        self.__str += data
-
-    def get_string(self):
-        return self.__str
 
 @contextlib.contextmanager
 def nostdout():
@@ -66,7 +60,7 @@ def stdoutcomparator(testbase, expected):
     """ This context is used to compare generated stdout against an expected
     value. """
 
-    builder = StringBuilder()
+    builder = StringIO()
 
     save_stdout = sys.stdout
     sys.stdout = builder
@@ -75,15 +69,18 @@ def stdoutcomparator(testbase, expected):
     
     sys.stdout = save_stdout
 
-    testbase.assertEquals(expected, builder.get_string())
+    testbase.assertEquals(expected, builder.getvalue())
     #assert(expected == builder.get_string())
 
 
 class MonkeyTest(mox.MoxTestBase):
+    """ Test suite for monkey. """
 
     __monkey_args = ["monkey", "foo", "bar", "foobar", "foobaz"]
 
     def setUp(self):
+        """ Set up variables used in test cases. """ 
+
         self.mox = mox.Mox()
 
         self.__header = StringIO("HEADER")
@@ -101,9 +98,14 @@ class MonkeyTest(mox.MoxTestBase):
                 (self.__header.getvalue(), self.__footer.getvalue()) 
 
     def tearDown(self):
+        """ Clean up after each test case. """
+
         self.mox.UnsetStubs()
 
     def test_invalid_number_of_arguments(self):
+        """ If incorrect number of arguments is passed to monkey, an error code
+        shall be returned. """
+
         # Stub this one just to make sure that it does not get called
         self.mox.StubOutWithMock(__builtin__, "open")
 
@@ -116,6 +118,9 @@ class MonkeyTest(mox.MoxTestBase):
                                               "foobar"]))
 
     def test_failing_to_open_header_file(self):
+        """ If monkey fails to open the header file, an error code shall be
+        returned. """
+
         self.mox.StubOutWithMock(__builtin__, "open")
 
         __builtin__.open("foo").AndRaise(IOError)
@@ -126,6 +131,9 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(2, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_footer_file(self):
+        """ If monkey fails to open the footer file, an error code shall be
+        returned. """
+
         mock_file = self.mox.CreateMockAnything()
 
         self.mox.StubOutWithMock(__builtin__, "open")
@@ -139,6 +147,9 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(2, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_template_file(self):
+        """ If monkey fails to open the template file, an error code shall be
+        returned. """
+
         mock_file = self.mox.CreateMockAnything()
 
         self.mox.StubOutWithMock(__builtin__, "open")
@@ -153,6 +164,9 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(2, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_csv_file(self):
+        """ If monkey fails to open the csv file, an error code shall be
+        returned. """
+
         mock_file = self.mox.CreateMockAnything()
 
         self.mox.StubOutWithMock(__builtin__, "open")
@@ -168,11 +182,15 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(2, monkey.main(self.__monkey_args))
 
     def test_help_command(self):
+        """ Make sure that the help flags are accepted. """
+
         with nostdout():
             self.assertEquals(0, monkey.main(["monkey", "-h"]))
             self.assertEquals(0, monkey.main(["monkey", "--help"]))
 
     def test_simple_translation(self):
+        """ Ensure that a basic CSV translation works as expected. """
+
         self.mox.StubOutWithMock(__builtin__, "open")
 
         __builtin__.open("foo").AndReturn(self.__header)
@@ -186,6 +204,9 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(0, monkey.main(self.__monkey_args))
 
     def test_translation_zero_index(self):
+        """ If a 0 index is encountered in the template file, an InvalidIndex
+        exception shall be raised. """
+
         self.mox.StubOutWithMock(__builtin__, "open")
 
         __builtin__.open("foo").AndReturn(self.__header)
@@ -198,6 +219,9 @@ class MonkeyTest(mox.MoxTestBase):
         self.assertRaises(monkey.InvalidIndex, monkey.main, self.__monkey_args)
 
     def test_translation_invalid_index(self):
+        """ If an invalid index (out of range) is encountered in the template
+        file, an InvalidIndex exception shall be raised. """
+
         self.mox.StubOutWithMock(__builtin__, "open")
 
         __builtin__.open("foo").AndReturn(self.__header)
@@ -210,6 +234,8 @@ class MonkeyTest(mox.MoxTestBase):
         self.assertRaises(monkey.InvalidIndex, monkey.main, self.__monkey_args)
 
     def test_translation_duplicate_indedxes(self):
+        """ Duplicated indexes in the template file should be accepted. """
+
         self.mox.StubOutWithMock(__builtin__, "open")
 
         __builtin__.open("foo").AndReturn(self.__header)
