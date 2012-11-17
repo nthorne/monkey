@@ -25,6 +25,8 @@ import re
 
 
 class InvalidIndex(Exception):
+    """ This exception is raised upon invalid template indexes. """
+
     def __init__(self, *args):
         super(InvalidIndex, self).__init__(*args)
 
@@ -96,32 +98,11 @@ def main(args):
 
     try:
         header = open(args[1])
-    except:
-        print "error: header file", args[1], "not found."
-        print
-        print_usage()
-        return 2
-
-    try:
         footer = open(args[2])
-    except:
-        print "error: footer file", args[2], "not found."
-        print
-        print_usage()
-        return 2
-
-    try:
         template = open(args[3])
-    except:
-        print "error: template file", args[3], "not found."
-        print
-        print_usage()
-        return 2
-
-    try:
         csv = open(args[4])
-    except:
-        print "error: csv", args[4], "not found."
+    except IOError as exc:
+        print "error: %s not found" % exc.filename
         print
         print_usage()
         return 2
