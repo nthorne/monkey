@@ -30,6 +30,7 @@ class InvalidIndex(Exception):
     def __init__(self, *args):
         super(InvalidIndex, self).__init__(*args)
 
+
 def print_usage():
     """ Display help text. """
 
@@ -39,7 +40,6 @@ def print_usage():
     print "occurence of %[0-9]+% in TEMPLATE with its respective CSV column."
     print "HEADER and FOOTER is prepended and appended, respectively, to the"
     print "output, which is written to stdout"
-
 
 
 def parse(header, footer, template, csv):
