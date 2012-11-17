@@ -41,48 +41,40 @@ def print_usage():
     print "output, which is written to stdout"
 
 
-class Parser:
-    """ This type implements the CSV parser. """
 
-    def __init__(self, header, footer, template, csv):
-        self.__header = header
-        self.__footer = footer
-        self.__template = template
-        self.__csv = csv
+def parse(header, footer, template, csv):
+    """ Parse the CSV file, and produce output based on the header, footer
+    and template files. """
 
-    def parse(self):
-        """ Parse the CSV file, and produce output based on the header, footer
-        and template files. """
+    result = header.read()
 
-        result = self.__header.read()
+    for line in csv:
+        fields = line.split(",")
+        fields = [l.strip() for l in fields]
+        fields = [item for item in fields if item]
 
-        for line in self.__csv:
-            fields = line.split(",")
-            fields = [l.strip() for l in fields]
-            fields = [item for item in fields if item]
+        if 0 != len(fields):
+            template.seek(0)
 
-            if 0 != len(fields):
-                self.__template.seek(0)
+            for tmpl in template:
+                matches = re.findall('%[0-9]+%', tmpl)
+                if matches:
+                    for match in matches:
+                        index = int(match.strip().strip('%'))
 
-                for tmpl in self.__template:
-                    matches = re.findall('%[0-9]+%', tmpl)
-                    if matches:
-                        for match in matches:
-                            index = int(match.strip().strip('%'))
+                        if 0 == index:
+                            raise InvalidIndex("invalid template index: 0")
+                        try:
+                            tmpl = tmpl.replace(match.strip(),
+                                                fields[index - 1])
+                        except:
+                            raise InvalidIndex(
+                                "invalid template index: %d" % index)
+                result += tmpl
 
-                            if 0 == index:
-                                raise InvalidIndex("invalid template index: 0")
-                            try:
-                                tmpl = tmpl.replace(match.strip(),
-                                                    fields[index - 1])
-                            except:
-                                raise InvalidIndex(
-                                    "invalid template index: %d" % index)
-                    result += tmpl
+    result += footer.read()
 
-        result += self.__footer.read()
-
-        return result
+    return result
 
 
 def main(args):
@@ -107,9 +99,7 @@ def main(args):
         print_usage()
         return 2
 
-    parser = Parser(header, footer, template, csv)
-
-    out = parser.parse()
+    out = parse(header, footer, template, csv)
 
     header.close()
     footer.close()
