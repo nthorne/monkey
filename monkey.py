@@ -67,13 +67,15 @@ class Parser:
                     if matches:
                         for match in matches:
                             index = int(match.strip().strip('%'))
+
+                            if 0 == index:
+                                raise InvalidIndex("invalid template index: 0")
                             try:
                                 tmpl = tmpl.replace(match.strip(),
                                                     fields[index - 1])
                             except:
-                                sys.stderr.write("no item %d (%s), in %s\n"
-                                                 %(index, tmpl.rstrip(),
-                                                   fields))
+                                raise InvalidIndex(
+                                    "invalid template index: %d" % index)
                     result += tmpl
 
         result += self.__footer.read()
