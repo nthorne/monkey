@@ -71,10 +71,10 @@ def main(args):
     """ Avoid polluting the global namespace. """
 
     parser = argparse.ArgumentParser(description="""
-Translate CSV into output by, for each CSV line, replacing every
-occurence of %[0-9]+% in TEMPLATE with its respective CSV column.
-HEADER and FOOTER is prepended and appended, respectively, to the
-output, which is written to stdout""")
+Translate csv into output by, for each csv line, replacing every
+occurence of %[0-9]+% in template with its respective csv column.
+header and footer is prepended and appended, respectively, to the
+output, which is written to stdout.""")
 
     parser.add_argument("header", type=str,
                         help="file contents are prepended to the translation")
