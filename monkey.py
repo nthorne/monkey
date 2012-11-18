@@ -22,6 +22,7 @@
 import sys
 import os
 import re
+import argparse
 
 
 class InvalidIndex(Exception):
@@ -80,24 +81,31 @@ def parse(header, footer, template, csv):
 def main(args):
     """ Avoid polluting the global namespace. """
 
-    if 5 != len(args):
-        if 2 == len(args) and ("-h" == args[1] or "--help" == args[1]):
-            print_usage()
-            return 0
-        else:
-            print_usage()
-            return 1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("header", type=str,
+                        help="file contents are prepended to the translation")
+    parser.add_argument("footer", type=str,
+                        help="file contents are appended to the translation")
+    parser.add_argument("template", type=str,
+                        help="contains the translation rules")
+    parser.add_argument("csv", type=str,
+                        help="the CSV table to translate")
 
     try:
-        header = open(args[1])
-        footer = open(args[2])
-        template = open(args[3])
-        csv = open(args[4])
+        args = parser.parse_args(args)
+    except SystemExit as exc:
+        return exc.code
+
+    try:
+        header = open(args.header)
+        footer = open(args.footer)
+        template = open(args.template)
+        csv = open(args.csv)
     except IOError as exc:
         print "error: %s not found" % exc.filename
         print
         print_usage()
-        return 2
+        return 128
 
     out = parse(header, footer, template, csv)
 
@@ -109,5 +117,6 @@ def main(args):
     print out
     return 0
 
+
 if "__main__" == __name__:
-    sys.exit(main(sys.argv))
+    sys.exit(main(sys.argv[1:]))

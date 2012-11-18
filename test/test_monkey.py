@@ -46,13 +46,17 @@ class DummyFile(object):
 
 
 @contextlib.contextmanager
-def nostdout():
-    """ This context is used to suppress output to stdout. """
+def nostdoutstderr():
+    """ This context is used to suppress output to stdout and stderr. """
     save_stdout = sys.stdout
+    save_stderr = sys.stderr
+
     sys.stdout = DummyFile()
+    sys.stderr = DummyFile()
 
     yield
 
+    sys.stderr = save_stderr
     sys.stdout = save_stdout
 
 @contextlib.contextmanager
@@ -76,7 +80,7 @@ def stdoutcomparator(testbase, expected):
 class MonkeyTest(mox.MoxTestBase):
     """ Test suite for monkey. """
 
-    __monkey_args = ["monkey", "foo", "bar", "foobar", "foobaz"]
+    __monkey_args = ["foo", "bar", "foobar", "foobaz"]
 
     def setUp(self):
         """ Set up variables used in test cases. """ 
@@ -111,11 +115,10 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.mox.ReplayAll()
 
-        with nostdout(): 
-            self.assertEquals(1, monkey.main(["monkey", "foo"]))
-            self.assertEquals(1, monkey.main(["monkey", "foo", "bar"]))
-            self.assertEquals(1, monkey.main(["monkey", "foo", "bar",
-                                              "foobar"]))
+        with nostdoutstderr(): 
+            self.assertEquals(2, monkey.main(["foo"]))
+            self.assertEquals(2, monkey.main(["foo", "bar"]))
+            self.assertEquals(2, monkey.main(["foo", "bar", "foobar"]))
 
     def test_failing_to_open_header_file(self):
         """ If monkey fails to open the header file, an error code shall be
@@ -127,8 +130,8 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.mox.ReplayAll()
 
-        with nostdout():
-            self.assertEquals(2, monkey.main(self.__monkey_args))
+        with nostdoutstderr():
+            self.assertEquals(128, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_footer_file(self):
         """ If monkey fails to open the footer file, an error code shall be
@@ -143,8 +146,8 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.mox.ReplayAll()
 
-        with nostdout():
-            self.assertEquals(2, monkey.main(self.__monkey_args))
+        with nostdoutstderr():
+            self.assertEquals(128, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_template_file(self):
         """ If monkey fails to open the template file, an error code shall be
@@ -160,8 +163,8 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.mox.ReplayAll()
 
-        with nostdout():
-            self.assertEquals(2, monkey.main(self.__monkey_args))
+        with nostdoutstderr():
+            self.assertEquals(128, monkey.main(self.__monkey_args))
 
     def test_failing_to_open_csv_file(self):
         """ If monkey fails to open the csv file, an error code shall be
@@ -178,15 +181,15 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.mox.ReplayAll()
 
-        with nostdout():
-            self.assertEquals(2, monkey.main(self.__monkey_args))
+        with nostdoutstderr():
+            self.assertEquals(128, monkey.main(self.__monkey_args))
 
     def test_help_command(self):
         """ Make sure that the help flags are accepted. """
 
-        with nostdout():
-            self.assertEquals(0, monkey.main(["monkey", "-h"]))
-            self.assertEquals(0, monkey.main(["monkey", "--help"]))
+        with nostdoutstderr():
+            self.assertEquals(0, monkey.main(["-h"]))
+            self.assertEquals(0, monkey.main(["--help"]))
 
     def test_simple_translation(self):
         """ Ensure that a basic CSV translation works as expected. """
