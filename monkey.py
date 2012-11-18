@@ -32,17 +32,6 @@ class InvalidIndex(Exception):
         super(InvalidIndex, self).__init__(*args)
 
 
-def print_usage():
-    """ Display help text. """
-
-    print "usage:", os.path.basename(sys.argv[0]), "HEADER FOOTER TEMPLATE CSV"
-    print
-    print "Translate CSV into output by, for each CSV line, replacing every"
-    print "occurence of %[0-9]+% in TEMPLATE with its respective CSV column."
-    print "HEADER and FOOTER is prepended and appended, respectively, to the"
-    print "output, which is written to stdout"
-
-
 def parse(header, footer, template, csv):
     """ Parse the CSV file, and produce output based on the header, footer
     and template files. """
@@ -81,7 +70,12 @@ def parse(header, footer, template, csv):
 def main(args):
     """ Avoid polluting the global namespace. """
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="""
+Translate CSV into output by, for each CSV line, replacing every
+occurence of %[0-9]+% in TEMPLATE with its respective CSV column.
+HEADER and FOOTER is prepended and appended, respectively, to the
+output, which is written to stdout""")
+
     parser.add_argument("header", type=str,
                         help="file contents are prepended to the translation")
     parser.add_argument("footer", type=str,
@@ -103,8 +97,8 @@ def main(args):
         csv = open(args.csv)
     except IOError as exc:
         print "error: %s not found" % exc.filename
-        print
-        print_usage()
+
+        parser.print_help()
         return 128
 
     out = parse(header, footer, template, csv)
