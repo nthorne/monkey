@@ -20,7 +20,6 @@
 """ monkey is a utility for translating CSV files based on template rules. """
 
 import sys
-import os
 import re
 import argparse
 
