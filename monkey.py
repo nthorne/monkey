@@ -31,14 +31,15 @@ class InvalidIndex(Exception):
         super(InvalidIndex, self).__init__(*args)
 
 
-def parse(header, footer, template, csv):
+def parse(header, footer, template, csv, separator):
     """ Parse the CSV file, and produce output based on the header, footer
-    and template files. """
+    and template files. separator defines the separator used to separate the csv
+    items. """
 
     result = header.read()
 
     for line in csv:
-        fields = line.split(",")
+        fields = line.split(separator)
         fields = [l.strip() for l in fields]
         fields = [item for item in fields if item]
 
@@ -75,14 +76,16 @@ occurence of %[0-9]+% in template with its respective csv column.
 header and footer is prepended and appended, respectively, to the
 output, which is written to stdout.""")
 
-    parser.add_argument("header", type=str,
-                        help="file contents are prepended to the translation")
-    parser.add_argument("footer", type=str,
-                        help="file contents are appended to the translation")
-    parser.add_argument("template", type=str,
-                        help="contains the translation rules")
-    parser.add_argument("csv", type=str,
-                        help="the CSV table to translate")
+    parser.add_argument("-s", "--separator", type = str, default=",",
+                        help = "define csv separator")
+    parser.add_argument("header", type = str,
+                        help = "file contents are prepended to the translation")
+    parser.add_argument("footer", type = str,
+                        help = "file contents are appended to the translation")
+    parser.add_argument("template", type = str,
+                        help = "contains the translation rules")
+    parser.add_argument("csv", type = str,
+                        help = "the CSV table to translate")
 
     try:
         args = parser.parse_args(args)
@@ -100,7 +103,7 @@ output, which is written to stdout.""")
         parser.print_help()
         return 128
 
-    out = parse(header, footer, template, csv)
+    out = parse(header, footer, template, csv, args.separator[0])
 
     header.close()
     footer.close()

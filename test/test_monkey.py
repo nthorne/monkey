@@ -81,6 +81,7 @@ class MonkeyTest(mox.MoxTestBase):
     """ Test suite for monkey. """
 
     __monkey_args = ["foo", "bar", "foobar", "foobaz"]
+    __monkey_args_changed_separator = ["-s=.", "foo", "bar", "foobar", "foobaz"]
 
     def setUp(self):
         """ Set up variables used in test cases. """ 
@@ -100,6 +101,8 @@ class MonkeyTest(mox.MoxTestBase):
                 (self.__header.getvalue(), self.__footer.getvalue()) 
         self.__expected_output_duplicated = "%sFIRST and FIRST%s\n" % \
                 (self.__header.getvalue(), self.__footer.getvalue()) 
+
+        self.__csv_dot_separator = StringIO("FIRST.SECOND")
 
     def tearDown(self):
         """ Clean up after each test case. """
@@ -250,6 +253,23 @@ class MonkeyTest(mox.MoxTestBase):
 
         with stdoutcomparator(self, self.__expected_output_duplicated):
             self.assertEquals(0, monkey.main(self.__monkey_args))
+
+    def test_changing_csv_separator(self):
+        """ Ensure translation, when having changed CSV separator, works as
+        expected. """
+
+        self.mox.StubOutWithMock(__builtin__, "open")
+
+        __builtin__.open("foo").AndReturn(self.__header)
+        __builtin__.open("bar").AndReturn(self.__footer)
+        __builtin__.open("foobar").AndReturn(self.__template)
+        __builtin__.open("foobaz").AndReturn(self.__csv_dot_separator)
+
+        self.mox.ReplayAll()
+
+        with stdoutcomparator(self, self.__expected_output_simple):
+            self.assertEquals(0,
+                              monkey.main(self.__monkey_args_changed_separator))
 
 
 if "__main__" == __name__:
