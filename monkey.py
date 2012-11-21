@@ -78,37 +78,27 @@ output, which is written to stdout.""")
 
     parser.add_argument("-s", "--separator", type = str, default=",",
                         help = "define csv separator")
-    parser.add_argument("header", type = str,
+    parser.add_argument("header", type = file,
                         help = "file contents are prepended to the translation")
-    parser.add_argument("footer", type = str,
+    parser.add_argument("footer", type = file,
                         help = "file contents are appended to the translation")
-    parser.add_argument("template", type = str,
+    parser.add_argument("template", type = file,
                         help = "contains the translation rules")
-    parser.add_argument("csv", type = str,
+    parser.add_argument("csv", type = file,
                         help = "the CSV table to translate")
 
     try:
         args = parser.parse_args(args)
     except SystemExit as exc:
         return exc.code
-
-    try:
-        header = open(args.header)
-        footer = open(args.footer)
-        template = open(args.template)
-        csv = open(args.csv)
     except IOError as exc:
         print "error: %s not found" % exc.filename
 
         parser.print_help()
         return 128
 
-    out = parse(header, footer, template, csv, args.separator[0])
-
-    header.close()
-    footer.close()
-    template.close()
-    csv.close()
+    out = parse(args.header, args.footer, args.template, args.csv,
+                args.separator[0])
 
     print out
     return 0
