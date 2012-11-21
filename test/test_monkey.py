@@ -103,6 +103,22 @@ class MonkeyTest(mox.MoxTestBase):
 
         self.__csv_dot_separator = StringIO("FIRST.SECOND")
 
+    def mock_reading_files(self, args, index_file_contents):
+        """ help method used to mock reading the defined files, where the
+        template file contents may vary. """
+
+        self.mox.StubOutWithMock(argparse.ArgumentParser, "_get_value")
+
+        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
+                                           mox.IgnoreArg()).AndReturn(",")
+        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
+                                           args[0]).AndReturn(self.__header)
+        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
+                                           args[1]).AndReturn(self.__footer)
+        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
+                                           args[2]).AndReturn(index_file_contents)
+        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
+                                           args[3]).AndReturn(self.__csv)
     def tearDown(self):
         """ Clean up after each test case. """
 
@@ -236,18 +252,8 @@ class MonkeyTest(mox.MoxTestBase):
     def test_simple_translation(self):
         """ Ensure that a basic CSV translation works as expected. """
 
-        self.mox.StubOutWithMock(argparse.ArgumentParser, "_get_value")
-
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           mox.IgnoreArg()).AndReturn(",")
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foo").AndReturn(self.__header)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "bar").AndReturn(self.__footer)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobar").AndReturn(self.__template)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobaz").AndReturn(self.__csv)
+        self.mock_reading_files(self.__monkey_args,
+                                self.__template)
 
         self.mox.ReplayAll()
 
@@ -258,19 +264,8 @@ class MonkeyTest(mox.MoxTestBase):
         """ If a 0 index is encountered in the template file, an InvalidIndex
         exception shall be raised. """
 
-        self.mox.StubOutWithMock(argparse.ArgumentParser, "_get_value")
-
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           mox.IgnoreArg()).AndReturn(",")
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foo").AndReturn(self.__header)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "bar").AndReturn(self.__footer)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobar").AndReturn(
-                                               self.__template_zero_index)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobaz").AndReturn(self.__csv)
+        self.mock_reading_files(self.__monkey_args,
+                                self.__template_zero_index)
 
         self.mox.ReplayAll()
 
@@ -280,19 +275,8 @@ class MonkeyTest(mox.MoxTestBase):
         """ If an invalid index (out of range) is encountered in the template
         file, an InvalidIndex exception shall be raised. """
 
-        self.mox.StubOutWithMock(argparse.ArgumentParser, "_get_value")
-
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           mox.IgnoreArg()).AndReturn(",")
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foo").AndReturn(self.__header)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "bar").AndReturn(self.__footer)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobar").AndReturn(
-                                               self.__template_invalid_index)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobaz").AndReturn(self.__csv)
+        self.mock_reading_files(self.__monkey_args,
+                                self.__template_invalid_index)
 
         self.mox.ReplayAll()
 
@@ -301,19 +285,9 @@ class MonkeyTest(mox.MoxTestBase):
     def test_translation_duplicate_indedxes(self):
         """ Duplicated indexes in the template file should be accepted. """
 
-        self.mox.StubOutWithMock(argparse.ArgumentParser, "_get_value")
 
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           mox.IgnoreArg()).AndReturn(",")
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foo").AndReturn(self.__header)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "bar").AndReturn(self.__footer)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobar").AndReturn(
-                                               self.__template_duplicated_index)
-        argparse.ArgumentParser._get_value(mox.IgnoreArg(),
-                                           "foobaz").AndReturn(self.__csv)
+        self.mock_reading_files(self.__monkey_args,
+                                self.__template_duplicated_index)
 
         self.mox.ReplayAll()
 
