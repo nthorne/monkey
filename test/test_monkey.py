@@ -320,6 +320,27 @@ class MonkeyTest(mox.MoxTestBase):
             self.assertEquals(0,
                               monkey.main(self.__monkey_args_changed_separator))
 
+    def test_full_line_comments(self):
+
+        template_with_multiline_comments = StringIO(
+                """# this is a multiline comment, which should be ignore
+# .. and so should this one
+%1% and %2%
+# .. as well as this one.""")
+
+        expected_output_when_multiline_comments = "%sFIRST and SECOND\n%s\n" % \
+                (self.__header.getvalue(), self.__footer.getvalue())
+
+
+        self.mock_reading_files(self.__monkey_args,
+                                template_with_multiline_comments)
+
+        self.mox.ReplayAll()
+
+        with stdoutcomparator(self, expected_output_when_multiline_comments):
+            self.assertEquals(0, monkey.main(self.__monkey_args))
+
+
 
 if "__main__" == __name__:
     unittest.main()

@@ -47,20 +47,21 @@ def parse(header, footer, template, csv, separator):
             template.seek(0)
 
             for tmpl in template:
-                matches = re.findall('%[0-9]+%', tmpl)
-                if matches:
-                    for match in matches:
-                        index = int(match.strip().strip('%'))
+                if not re.match(r'^#', tmpl):
+                    matches = re.findall('%[0-9]+%', tmpl)
+                    if matches:
+                        for match in matches:
+                            index = int(match.strip().strip('%'))
 
-                        if 0 == index:
-                            raise InvalidIndex("invalid template index: 0")
-                        try:
-                            tmpl = tmpl.replace(match.strip(),
-                                                fields[index - 1])
-                        except:
-                            raise InvalidIndex(
-                                "invalid template index: %d" % index)
-                result += tmpl
+                            if 0 == index:
+                                raise InvalidIndex("invalid template index: 0")
+                            try:
+                                tmpl = tmpl.replace(match.strip(),
+                                                    fields[index - 1])
+                            except:
+                                raise InvalidIndex(
+                                    "invalid template index: %d" % index)
+                    result += tmpl
 
     result += footer.read()
 
